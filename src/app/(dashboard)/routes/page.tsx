@@ -1,47 +1,116 @@
 ﻿'use client';
-import { useState } from 'react';
-import Header from '@/components/Header';
-import Modal from '@/components/Modal';
-import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
-interface Route { id:number;number:string;name:string;normSK:number;payType:string;payment:number;fines:number;status:string; }
-const init: Route[] = [
-  {id:1,number:'M-001',name:'Ярославль - Москва',normSK:350,payType:'Ставка',payment:15000,fines:500,status:'Активен'},
-  {id:2,number:'M-002',name:'Ярославль - СПб',normSK:400,payType:'Ставка',payment:18000,fines:700,status:'Активен'},
-  {id:3,number:'M-003',name:'Москва - Казань',normSK:500,payType:'За коробку',payment:45,fines:300,status:'Активен'},
-  {id:4,number:'M-004',name:'СПб - Нижний Новгород',normSK:420,payType:'Ставка',payment:20000,fines:600,status:'Неактивен'},
-  {id:5,number:'M-005',name:'Ярославль - Кострома',normSK:200,payType:'Ставка',payment:8000,fines:200,status:'Активен'},
-];
+import { useState, useEffect } from 'react';
+import { Search, RefreshCw, Loader2 } from 'lucide-react';
+interface WBRoute {
+  route_car_id: number;
+  distance: number;
+  normative_liters: number;
+  plan_count_departure: number;
+  count_shk: number;
+  count_tares: number;
+  volume_ml_by_content: number;
+  parking: number[];
+}
+interface OfficeData {
+  office_id: number;
+  office_name: string;
+  count_shk: number;
+  count_tares: number;
+  total_volume_ml: number;
+  routes: WBRoute[];
+}
 export default function RoutesPage() {
-  const [routes,setRoutes]=useState<Route[]>(init);const [search,setSearch]=useState('');const [isModalOpen,setIsModalOpen]=useState(false);const [editing,setEditing]=useState<Route|null>(null);
-  const [form,setForm]=useState({number:'',name:'',normSK:0,payType:'Ставка',payment:0,fines:0});
-  const filtered=routes.filter(r=>r.number.toLowerCase().includes(search.toLowerCase())||r.name.toLowerCase().includes(search.toLowerCase()));
-  const openCreate=()=>{setEditing(null);setForm({number:'',name:'',normSK:0,payType:'Ставка',payment:0,fines:0});setIsModalOpen(true);};
-  const openEdit=(r:Route)=>{setEditing(r);setForm({number:r.number,name:r.name,normSK:r.normSK,payType:r.payType,payment:r.payment,fines:r.fines});setIsModalOpen(true);};
-  const handleSave=()=>{if(editing){setRoutes(p=>p.map(r=>r.id===editing.id?{...r,...form}:r));}else{setRoutes(p=>[...p,{id:Date.now(),...form,status:'Активен'}]);}setIsModalOpen(false);};
-  const handleDelete=(id:number)=>{if(confirm('Удалить?'))setRoutes(p=>p.filter(r=>r.id!==id));};
-  return (<div>
-    <Header title="Маршруты" actions={<button className="btn-primary" onClick={openCreate}><Plus size={16}/> Добавить маршрут</button>}/>
-    <div style={{marginBottom:'16px'}}><div style={{position:'relative',display:'inline-block'}}><Search size={16} style={{position:'absolute',left:'12px',top:'50%',transform:'translateY(-50%)',color:'#6b6b7b'}}/><input type="text" placeholder="Поиск маршрутов..." value={search} onChange={e=>setSearch(e.target.value)} className="form-input" style={{paddingLeft:'36px',width:'300px'}}/></div></div>
-    <div style={{borderRadius:'8px',border:'1px solid #464652',overflow:'hidden'}}>
-      <table style={{width:'100%',borderCollapse:'collapse',fontSize:'14px'}}>
-        <thead><tr style={{borderBottom:'1px solid #464652'}}>{['Номер','Название','Норма ШК','Тип оплаты','Оплата','Штрафы','Статус','Действия'].map(h=>(<th key={h} style={{padding:'12px 16px',textAlign:'left',color:'#9d9dab',fontWeight:500}}>{h}</th>))}</tr></thead>
-        <tbody>{filtered.map(r=>(<tr key={r.id} style={{borderBottom:'1px solid #464652'}}>
-          <td style={{padding:'14px 16px',color:'#ba85ff',fontWeight:500}}>{r.number}</td>
-          <td style={{padding:'14px 16px',color:'#e7e2f0'}}>{r.name}</td>
-          <td style={{padding:'14px 16px',color:'#e7e2f0'}}>{r.normSK}</td>
-          <td style={{padding:'14px 16px',color:'#e7e2f0'}}>{r.payType}</td>
-          <td style={{padding:'14px 16px',color:'#e7e2f0'}}>{r.payment.toLocaleString()} P</td>
-          <td style={{padding:'14px 16px',color:'#ef4444'}}>{r.fines.toLocaleString()} P</td>
-          <td style={{padding:'14px 16px'}}><span className={r.status==='Активен'?'badge-active':'badge-inactive'}>{r.status}</span></td>
-          <td style={{padding:'14px 16px'}}><div style={{display:'flex',gap:'4px'}}><button onClick={()=>openEdit(r)} style={{padding:'6px',backgroundColor:'transparent',border:'none',color:'#9d9dab',cursor:'pointer'}}><Pencil size={16}/></button><button onClick={()=>handleDelete(r.id)} style={{padding:'6px',backgroundColor:'transparent',border:'none',color:'#9d9dab',cursor:'pointer'}}><Trash2 size={16}/></button></div></td>
-        </tr>))}</tbody></table></div>
-    <Modal isOpen={isModalOpen} onClose={()=>setIsModalOpen(false)} title={editing?'Редактировать маршрут':'Добавить маршрут'}>
-      <div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:'12px'}}><div><label className="form-label">Номер</label><input className="form-input" value={form.number} onChange={e=>setForm({...form,number:e.target.value})} placeholder="M-006"/></div><div><label className="form-label">Название</label><input className="form-input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Город - Город"/></div></div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}><div><label className="form-label">Норма ШК</label><input className="form-input" type="number" value={form.normSK} onChange={e=>setForm({...form,normSK:parseInt(e.target.value)||0})}/></div><div><label className="form-label">Тип оплаты</label><select className="form-select" value={form.payType} onChange={e=>setForm({...form,payType:e.target.value})}><option>Ставка</option><option>За коробку</option><option>Процент</option></select></div></div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}><div><label className="form-label">Оплата</label><input className="form-input" type="number" value={form.payment} onChange={e=>setForm({...form,payment:parseFloat(e.target.value)||0})}/></div><div><label className="form-label">Штрафы</label><input className="form-input" type="number" value={form.fines} onChange={e=>setForm({...form,fines:parseFloat(e.target.value)||0})}/></div></div>
-        <div style={{display:'flex',gap:'10px',justifyContent:'flex-end',marginTop:'8px'}}><button className="btn-outline" onClick={()=>setIsModalOpen(false)}>Отмена</button><button className="btn-primary" onClick={handleSave}>{editing?'Сохранить':'Добавить'}</button></div>
+  const [offices, setOffices] = useState<OfficeData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
+  useEffect(() => { fetchRoutes(); }, []);
+  const fetchRoutes = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const res = await fetch('/api/wb/reports/v1/last-mile');
+      const json = await res.json();
+      if (json.data) setOffices(json.data);
+      else setError(json.error || 'Ошибка загрузки');
+    } catch (e: any) { setError('Ошибка: ' + e.message); }
+    finally { setLoading(false); }
+  };
+  const allRoutes = offices.flatMap(o => o.routes.map(r => ({ ...r, office_name: o.office_name })));
+  const filtered = allRoutes.filter(r =>
+    String(r.route_car_id).includes(search) || r.office_name?.toLowerCase().includes(search.toLowerCase())
+  );
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e7e2f0', margin: 0 }}>Маршруты WB</h1>
+          <p style={{ color: '#9d9dab', fontSize: 14, marginTop: 4 }}>Данные из WB API (Остатки последней мили)</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9d9dab' }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Поиск маршрутов..." style={{ padding: '8px 12px 8px 32px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 13, width: 220 }} />
+          </div>
+          <button onClick={fetchRoutes} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: '#ba85ff', color: '#0f051c', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, height: 36 }}>
+            <RefreshCw size={16} /> Обновить
+          </button>
+        </div>
       </div>
-    </Modal>
-  </div>);
+      {offices.length > 0 && !loading && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+          {offices.map(o => (
+            <div key={o.office_id} style={{ border: '1px solid #464652', borderRadius: 8, padding: '16px 20px' }}>
+              <p style={{ color: '#9d9dab', fontSize: 12, margin: '0 0 4px 0' }}>{o.office_name}</p>
+              <p style={{ color: '#e7e2f0', fontSize: 24, fontWeight: 700, margin: '0 0 8px 0' }}>{o.routes.length} <span style={{ fontSize: 14, fontWeight: 400, color: '#9d9dab' }}>маршрутов</span></p>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <span style={{ color: '#ba85ff', fontSize: 13 }}>ШК: {o.count_shk.toLocaleString()}</span>
+                <span style={{ color: '#9d9dab', fontSize: 13 }}>Тар: {o.count_tares.toLocaleString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 64 }}>
+          <Loader2 size={32} style={{ color: '#ba85ff', margin: '0 auto 16px' }} className="animate-spin" />
+          <p style={{ color: '#9d9dab' }}>Загрузка маршрутов из WB API...</p>
+        </div>
+      ) : error ? (
+        <div style={{ border: '1px solid #ef4444', borderRadius: 8, padding: 24, textAlign: 'center' }}>
+          <p style={{ color: '#ef4444' }}>{error}</p>
+        </div>
+      ) : (
+        <div style={{ border: '1px solid #464652', borderRadius: 8, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #464652' }}>
+                {['Маршрут','Офис','Парковка','Число тар','Число ШК','Объем, л','Норм. выездов','Норм. объем, л','Дистанция, км'].map(h => (
+                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 500, color: '#9d9dab' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #464652' }}>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#ba85ff', fontWeight: 600 }}>{r.route_car_id}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{r.office_name}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#9d9dab' }}>{r.parking?.join(', ') || String.fromCharCode(8212)}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{r.count_tares}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{r.count_shk}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{(r.volume_ml_by_content / 1000).toFixed(2)}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{r.plan_count_departure}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{r.normative_liters.toFixed(2)}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#9d9dab' }}>{r.distance.toFixed(3)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ padding: '12px 16px', borderTop: '1px solid #464652', color: '#9d9dab', fontSize: 13 }}>
+            Всего: {filtered.length} маршрутов
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
