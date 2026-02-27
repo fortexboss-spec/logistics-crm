@@ -1,17 +1,25 @@
-﻿"use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
+﻿'use client';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/Sidebar';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [isAuth, setIsAuth] = useState(false);
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
-    if (!token) router.push("/login");
+    const auth = localStorage.getItem('crm_auth');
+    if (!auth) { router.push('/login'); } else { setIsAuth(true); }
   }, [router]);
+  if (!isAuth) return null;
   return (
-    <div className="flex min-h-screen bg-dark-bg">
+    <div style={{display:'flex',minHeight:'100vh'}}>
       <Sidebar />
-      <main className="ml-52 flex-1 p-6">{children}</main>
+      <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+        <main style={{flex:1,overflow:'auto'}}>
+          <div style={{padding:'24px'}}>
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

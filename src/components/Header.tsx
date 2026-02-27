@@ -1,5 +1,5 @@
 ﻿'use client';
-import { Moon, User } from 'lucide-react';
+import { Moon, User, PanelLeft } from 'lucide-react';
 interface HeaderProps {
   title: string;
   subtitle?: string;
@@ -7,18 +7,18 @@ interface HeaderProps {
 }
 export default function Header({ title, subtitle, actions }: HeaderProps) {
   return (
-    <header style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'24px'}}>
-      <div>
-        <h1 style={{fontSize:'24px',fontWeight:'bold',color:'#f1f5f9'}}>{title}</h1>
-        {subtitle && <p style={{fontSize:'14px',color:'#64748b',marginTop:'4px'}}>{subtitle}</p>}
-      </div>
-      <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+    <header style={{display:'flex',alignItems:'center',height:'56px',padding:'0 16px',borderBottom:'1px solid #464652',backgroundColor:'rgba(24,24,27,0.6)',backdropFilter:'blur(12px)',position:'sticky',top:0,zIndex:10,gap:'12px'}}>
+      <button style={{padding:'8px',borderRadius:'8px',backgroundColor:'transparent',border:'none',color:'#e7e2f0',cursor:'pointer',display:'flex',alignItems:'center'}}>
+        <PanelLeft size={18} />
+      </button>
+      <h1 style={{fontSize:'16px',fontWeight:600,color:'#e7e2f0',flex:1}}>{title}</h1>
+      <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
         {actions}
-        <button style={{padding:'8px',borderRadius:'8px',backgroundColor:'transparent',border:'1px solid #2a3548',color:'#94a3b8',cursor:'pointer'}}>
-          <Moon size={18} />
+        <button style={{padding:'8px',borderRadius:'8px',backgroundColor:'transparent',border:'none',color:'#e7e2f0',cursor:'pointer',display:'flex',alignItems:'center'}}>
+          <Moon size={16} />
         </button>
-        <button style={{padding:'8px',borderRadius:'8px',backgroundColor:'transparent',border:'1px solid #2a3548',color:'#94a3b8',cursor:'pointer'}}>
-          <User size={18} />
+        <button style={{padding:'8px',borderRadius:'8px',backgroundColor:'transparent',border:'none',color:'#e7e2f0',cursor:'pointer',display:'flex',alignItems:'center'}}>
+          <User size={16} />
         </button>
       </div>
     </header>
