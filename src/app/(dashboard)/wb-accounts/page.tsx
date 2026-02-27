@@ -1,76 +1,90 @@
 ﻿'use client';
 import { useState } from 'react';
-import Header from '@/components/Header';
+import { Plus, Pencil, Trash2, Copy, Eye, EyeOff, Link2 } from 'lucide-react';
 import Modal from '@/components/Modal';
-import { Plus, Pencil, Trash2, Copy } from 'lucide-react';
 interface WBAccount {
   id: number;
   name: string;
   supplierId: string;
   offices: string;
-  status: string;
-  lastUsed: string;
   token: string;
+  status: 'active' | 'inactive';
+  lastUsed: string;
 }
 const initialAccounts: WBAccount[] = [
-  { id: 1, name: 'Freshkom', supplierId: '344813', offices: '338827', status: 'Активен', lastUsed: '27.02.2026, 04:18', token: 'eyJhbGciOi...' },
+  { id: 1, name: 'Freshkom', supplierId: '344813', offices: '338827', token: 'eyJhbGciOiJFUzI1...', status: 'active', lastUsed: '27.02.2026, 04:18' },
 ];
 export default function WBAccountsPage() {
   const [accounts, setAccounts] = useState<WBAccount[]>(initialAccounts);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editing, setEditing] = useState<WBAccount | null>(null);
-  const [form, setForm] = useState({ name: '', supplierId: '', offices: '', token: '' });
-  const [showInactive, setShowInactive] = useState(true);
-  const openCreate = () => { setEditing(null); setForm({ name: '', supplierId: '', offices: '', token: '' }); setIsModalOpen(true); };
-  const openEdit = (acc: WBAccount) => { setEditing(acc); setForm({ name: acc.name, supplierId: acc.supplierId, offices: acc.offices, token: acc.token }); setIsModalOpen(true); };
-  const handleSave = () => {
-    if (editing) { setAccounts(prev => prev.map(a => a.id === editing.id ? { ...a, ...form } : a)); }
-    else { setAccounts(prev => [...prev, { id: Date.now(), ...form, status: 'Активен', lastUsed: new Date().toLocaleString('ru') }]); }
-    setIsModalOpen(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editItem, setEditItem] = useState<WBAccount | null>(null);
+  const [hideInactive, setHideInactive] = useState(false);
+  const [showToken, setShowToken] = useState<Record<number, boolean>>({});
+  const [form, setForm] = useState({ name: '', supplierId: '', offices: '', token: '', status: 'active' as const });
+  const filtered = hideInactive ? accounts.filter(a => a.status === 'active') : accounts;
+  const openAdd = () => { setEditItem(null); setForm({ name: '', supplierId: '', offices: '', token: '', status: 'active' }); setShowModal(true); };
+  const openEdit = (a: WBAccount) => { setEditItem(a); setForm({ name: a.name, supplierId: a.supplierId, offices: a.offices, token: a.token, status: a.status }); setShowModal(true); };
+  const save = () => {
+    if (editItem) {
+      setAccounts(accounts.map(a => a.id === editItem.id ? { ...a, ...form, lastUsed: a.lastUsed } : a));
+    } else {
+      setAccounts([...accounts, { id: Date.now(), ...form, lastUsed: new Date().toLocaleString('ru') }]);
+    }
+    setShowModal(false);
   };
-  const handleDelete = (id: number) => { if (confirm('Удалить аккаунт?')) setAccounts(prev => prev.filter(a => a.id !== id)); };
-  const copyText = (text: string) => { navigator.clipboard.writeText(text); };
-  const filtered = showInactive ? accounts : accounts.filter(a => a.status === 'Активен');
+  const remove = (id: number) => { if (confirm('Удалить аккаунт?')) setAccounts(accounts.filter(a => a.id !== id)); };
+  const copyText = (text: string) => navigator.clipboard.writeText(text);
   return (
     <div>
-      <Header title="WB Аккаунты" subtitle="Управление аккаунтами Wildberries (токены, supplier ID, офисы)"
-        actions={
-          <div style={{display:'flex',gap:'10px'}}>
-            <button className="btn-outline" onClick={() => setShowInactive(!showInactive)}>{showInactive ? 'Скрыть неактивные' : 'Показать все'}</button>
-            <button className="btn-purple" onClick={openCreate}><Plus size={16} /> Добавить аккаунт</button>
-          </div>
-        }
-      />
-      <div style={{backgroundColor:'#1a2235',borderRadius:'12px',border:'1px solid #2a3548',overflow:'hidden'}}>
-        <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e7e2f0', margin: 0 }}>WB Аккаунты</h1>
+          <p style={{ color: '#9d9dab', fontSize: 14, marginTop: 4 }}>Управление аккаунтами Wildberries (токены, supplier ID, офисы)</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setHideInactive(!hideInactive)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #ba85ff', background: 'transparent', color: '#ba85ff', fontSize: 13, cursor: 'pointer' }}>
+            {hideInactive ? 'Показать все' : 'Скрыть неактивные'}
+          </button>
+          <button onClick={openAdd} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: '#ba85ff', color: '#0f051c', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Plus size={16} /> Добавить аккаунт
+          </button>
+        </div>
+      </div>
+      <div style={{ border: '1px solid #464652', borderRadius: 8, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{borderBottom:'1px solid #2a3548'}}>
+            <tr style={{ borderBottom: '1px solid #464652' }}>
               {['Название','Supplier ID','Офисы','Статус','Последнее использование','Действия'].map(h => (
-                <th key={h} style={{padding:'12px 16px',textAlign:'left',color:'#94a3b8',fontWeight:500}}>{h}</th>
+                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 500, color: '#9d9dab' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filtered.map(acc => (
-              <tr key={acc.id} style={{borderBottom:'1px solid #2a3548'}}>
-                <td style={{padding:'10px 16px',color:'#e2e8f0'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                    <span style={{color:'#8b5cf6'}}>&#9881;</span> {acc.name}
-                  </div>
+            {filtered.map(a => (
+              <tr key={a.id} style={{ borderBottom: '1px solid #464652' }}>
+                <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Link2 size={14} style={{ color: '#ba85ff' }} /> {a.name}
+                  </span>
                 </td>
-                <td style={{padding:'10px 16px'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                    <span className="badge-purple">{acc.supplierId}</span>
-                    <button onClick={() => copyText(acc.supplierId)} style={{padding:'2px',backgroundColor:'transparent',border:'none',color:'#94a3b8',cursor:'pointer'}}><Copy size={14}/></button>
-                  </div>
+                <td style={{ padding: '14px 16px', fontSize: 14 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ background: '#22c55e', color: '#fff', padding: '2px 10px', borderRadius: 10, fontSize: 12, fontWeight: 600 }}>{a.supplierId}</span>
+                    <button onClick={() => copyText(a.supplierId)} style={{ background: 'none', border: 'none', color: '#9d9dab', cursor: 'pointer', padding: 2 }}><Copy size={14} /></button>
+                  </span>
                 </td>
-                <td style={{padding:'10px 16px'}}><span className="badge-purple">{acc.offices}</span></td>
-                <td style={{padding:'10px 16px'}}><span className="badge-green">{acc.status}</span></td>
-                <td style={{padding:'10px 16px',color:'#94a3b8'}}>{acc.lastUsed}</td>
-                <td style={{padding:'10px 16px'}}>
-                  <div style={{display:'flex',gap:'6px'}}>
-                    <button onClick={() => openEdit(acc)} style={{padding:'4px',backgroundColor:'transparent',border:'none',color:'#94a3b8',cursor:'pointer'}}><Pencil size={16}/></button>
-                    <button onClick={() => handleDelete(acc.id)} style={{padding:'4px',backgroundColor:'transparent',border:'none',color:'#94a3b8',cursor:'pointer'}}><Trash2 size={16}/></button>
+                <td style={{ padding: '14px 16px', fontSize: 14, color: '#e7e2f0' }}>{a.offices}</td>
+                <td style={{ padding: '14px 16px', fontSize: 14 }}>
+                  <span style={{ padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: a.status === 'active' ? '#ba85ff' : '#392b4c', color: a.status === 'active' ? '#0f051c' : '#e7e2f0' }}>
+                    {a.status === 'active' ? 'Активен' : 'Неактивен'}
+                  </span>
+                </td>
+                <td style={{ padding: '14px 16px', fontSize: 14, color: '#9d9dab' }}>{a.lastUsed}</td>
+                <td style={{ padding: '14px 16px', fontSize: 14 }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setShowToken(p => ({ ...p, [a.id]: !p[a.id] }))} style={{ background: 'none', border: 'none', color: '#9d9dab', cursor: 'pointer' }}>{showToken[a.id] ? <EyeOff size={16}/> : <Eye size={16}/>}</button>
+                    <button onClick={() => openEdit(a)} style={{ background: 'none', border: 'none', color: '#9d9dab', cursor: 'pointer' }}><Pencil size={16} /></button>
+                    <button onClick={() => remove(a.id)} style={{ background: 'none', border: 'none', color: '#9d9dab', cursor: 'pointer' }}><Trash2 size={16} /></button>
                   </div>
                 </td>
               </tr>
@@ -78,16 +92,34 @@ export default function WBAccountsPage() {
           </tbody>
         </table>
       </div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editing ? 'Редактировать аккаунт' : 'Добавить аккаунт'}>
-        <div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
-          <div><label className="form-label">Название</label><input className="form-input" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Freshkom" /></div>
-          <div><label className="form-label">Supplier ID</label><input className="form-input" value={form.supplierId} onChange={(e) => setForm({...form, supplierId: e.target.value})} placeholder="344813" /></div>
-          <div><label className="form-label">Офисы (ID через запятую)</label><input className="form-input" value={form.offices} onChange={(e) => setForm({...form, offices: e.target.value})} placeholder="338827" /></div>
-          <div><label className="form-label">API Токен</label><textarea className="form-input" rows={3} value={form.token} onChange={(e) => setForm({...form, token: e.target.value})} placeholder="eyJhbGciOi..." style={{resize:'vertical'}} /></div>
-          <div style={{display:'flex',gap:'10px',justifyContent:'flex-end',marginTop:'8px'}}>
-            <button className="btn-outline" onClick={() => setIsModalOpen(false)}>Отмена</button>
-            <button className="btn-purple" onClick={handleSave}>{editing ? 'Сохранить' : 'Добавить'}</button>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Редактировать аккаунт' : 'Добавить аккаунт'}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>Название</label>
+            <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }} />
           </div>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>Supplier ID</label>
+            <input value={form.supplierId} onChange={e => setForm({...form, supplierId: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>Офисы</label>
+            <input value={form.offices} onChange={e => setForm({...form, offices: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>API Токен</label>
+            <input value={form.token} onChange={e => setForm({...form, token: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>Статус</label>
+            <select value={form.status} onChange={e => setForm({...form, status: e.target.value as 'active'|'inactive'})} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }}>
+              <option value="active">Активен</option>
+              <option value="inactive">Неактивен</option>
+            </select>
+          </div>
+          <button onClick={save} style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#ba85ff', color: '#0f051c', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 8 }}>
+            {editItem ? 'Сохранить' : 'Добавить'}
+          </button>
         </div>
       </Modal>
     </div>

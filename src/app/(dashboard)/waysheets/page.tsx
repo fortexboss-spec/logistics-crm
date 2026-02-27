@@ -1,46 +1,70 @@
-﻿"use client";
-import { useState } from "react";
-import Header from "@/components/Header";
-import { Download } from "lucide-react";
-const types = ["Все листы", "Последняя миля", "Магистраль"];
+﻿'use client';
+import { useState } from 'react';
+import { FileText, Download } from 'lucide-react';
 export default function WaysheetsPage() {
-  const [activeType, setActiveType] = useState("Все листы");
-  const [dateFrom, setDateFrom] = useState("20.02.2026");
-  const [dateTo, setDateTo] = useState("27.02.2026");
+  const [sheetType, setSheetType] = useState('all');
+  const [dateFrom, setDateFrom] = useState('2026-02-20');
+  const [dateTo, setDateTo] = useState('2026-02-27');
+  const types = [
+    { key: 'all', label: 'Все листы' },
+    { key: 'lastmile', label: 'Последняя миля' },
+    { key: 'trunk', label: 'Магистраль' },
+  ];
   return (
     <div>
-      <Header title="Расчет зарплаты" />
-      <p className="text-gray-400 mb-6">Скачивание и расчет зарплаты по путевым листам из Wildberries</p>
-      <div className="bg-dark-card border border-dark-border rounded-xl p-6 mb-6">
-        <h3 className="text-white font-semibold mb-4">Выберите период и тип путевых листов</h3>
-        <p className="text-gray-400 text-sm mb-2">Тип путевых листов</p>
-        <div className="flex gap-2 mb-4">{types.map(t => (
-          <button key={t} onClick={() => setActiveType(t)}
-            className={"px-4 py-2 rounded-lg text-sm transition-colors " + (activeType === t ? "bg-purple-primary text-white" : "bg-dark-bg border border-dark-border text-gray-400 hover:text-white")}>{t}</button>
-        ))}</div>
-        <p className="text-gray-500 text-xs mb-4">Все типы оплаты</p>
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div><label className="block text-sm text-gray-400 mb-1">Дата начала</label>
-            <input type="text" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-              className="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-white focus:outline-none focus:border-purple-primary" /></div>
-          <div><label className="block text-sm text-gray-400 mb-1">Дата окончания</label>
-            <input type="text" value={dateTo} onChange={e => setDateTo(e.target.value)}
-              className="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-white focus:outline-none focus:border-purple-primary" /></div>
-          <div className="flex items-end">
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-primary hover:bg-purple-hover text-white rounded-lg transition-colors"><Download size={16} /> Скачать</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <FileText size={24} style={{ color: '#ba85ff' }} />
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e7e2f0', margin: 0 }}>Расчет зарплаты</h1>
+        </div>
+      </div>
+      <p style={{ color: '#9d9dab', fontSize: 14, marginTop: -16, marginBottom: 24 }}>Скачивание и расчет зарплаты по путевым листам из Wildberries</p>
+      <div style={{ border: '1px solid #464652', borderRadius: 8, padding: 24, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+          <FileText size={18} style={{ color: '#ba85ff' }} />
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: '#e7e2f0', margin: 0 }}>Выберите период и тип путевых листов</h3>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 8, display: 'block' }}>Тип путевых листов</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {types.map(t => (
+              <button key={t.key} onClick={() => setSheetType(t.key)} style={{ padding: '8px 20px', borderRadius: 8, border: sheetType === t.key ? 'none' : '1px solid #464652', background: sheetType === t.key ? '#ba85ff' : 'transparent', color: sheetType === t.key ? '#0f051c' : '#e7e2f0', fontSize: 13, fontWeight: sheetType === t.key ? 600 : 400, cursor: 'pointer' }}>
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
-        <p className="text-yellow-400 text-sm">Важно: Максимальный период: 7 дней. Для каждого кабинета будет создан отдельный Excel файл.</p>
+        <p style={{ color: '#9d9dab', fontSize: 12, marginBottom: 16 }}>Все типы оплаты</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 16, alignItems: 'end' }}>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>Дата начала</label>
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 13, color: '#9d9dab', marginBottom: 6, display: 'block' }}>Дата окончания</label>
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #3a3a42', background: 'rgba(58,58,66,0.3)', color: '#e7e2f0', fontSize: 14 }} />
+          </div>
+          <button style={{ padding: '10px 32px', borderRadius: 8, border: 'none', background: '#ba85ff', color: '#0f051c', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, height: 42 }}>
+            <Download size={16} /> Скачать
+          </button>
+        </div>
+        <p style={{ color: '#fbbf24', fontSize: 12, marginTop: 12 }}>
+          <strong>Важно:</strong> Максимальный период: 7 дней. Для каждого кабинета будет создан отдельный Excel файл.
+        </p>
       </div>
-      <div className="bg-dark-card border border-dark-border rounded-xl p-6">
-        <h3 className="text-white font-semibold mb-4">Как использовать:</h3>
-        <div className="space-y-2 text-gray-400 text-sm">
-          <p>1. Выберите тип путевых листов: Все листы / Последняя миля / Магистраль</p>
-          <p>2. Выберите дату начала и окончания периода (максимум 7 дней)</p>
-          <p>3. Нажмите кнопку Скачать</p>
-          <p>4. Система получит путевые листы из WB API для выбранного типа</p>
-          <p>5. Для каждого кабинета будет создан отдельный Excel файл</p>
-          <p>6. Нажмите Скачать Excel на карточке нужного кабинета</p>
+      <div style={{ border: '1px solid #464652', borderRadius: 8, padding: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#e7e2f0', margin: '0 0 16px 0' }}>Как использовать:</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[
+            'Выберите тип путевых листов: Все листы / Последняя миля / Магистраль',
+            'Выберите дату начала и окончания периода (максимум 7 дней)',
+            'Нажмите кнопку "Скачать"',
+            'Система получит путевые листы из WB API для выбранного типа',
+            'Для каждого кабинета будет создан отдельный Excel файл',
+            'Нажмите "Скачать Excel" на карточке нужного кабинета',
+          ].map((text, i) => (
+            <p key={i} style={{ color: '#9d9dab', fontSize: 13, margin: 0 }}>{i + 1}. {text}</p>
+          ))}
         </div>
       </div>
     </div>
