@@ -1,0 +1,18 @@
+﻿export const WB_API = {
+  LOGISTICS: "https://logistics.wb.ru",
+  DRIVE: "https://drive.wb.ru",
+  WAYSHEETS: "/client-gateway/api/waysheets/v1/waysheets",
+  SHIPMENTS: "/shipments-service/api/v1/shipments",
+  TRANSPORT_REQUESTS: "/transport-requests-service/api/v1/transport-requests",
+  LAST_MILE: "/reports-service/api/v1/last-mile",
+  BALANCE: "/client-gateway/api/finance/balance/v2/balances",
+  OPERATIONS_HISTORY: "/client-gateway/api/finance/credeber/v1/operations/history",
+  EXTERNAL_DRIVERS: "/waysheets-netcore-service/api/v1/external-driver/get-all/true",
+  DRIVER_OFFERS: "/drivers-service/api/v1/driver-offers/supplier",
+  ROUTES: "/routes-netcore-service/api/v1/route/non-auto-driver-v2",
+  VEHICLE_TYPES: "/vehicles-service/api/v2/types",
+  VEHICLE_STATUSES: "/vehicles-service/api/v2/statuses",
+  VEHICLES: "/vehicles-service/api/v2/vehicles",
+  PLANNING: "/transport-planning-service/api/v1/planning/mgt",
+  COURIER_SHIPMENTS: "/client-gateway/courier/api/v1/admin/shipments/in-progress/list",
+};
