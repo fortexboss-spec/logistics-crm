@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+model Organization {
+  id           Int      @id @default(autoincrement())
+  name         String
+  inn          String?
+  paymentType  String   @default("fixed")
+  paymentValue String   @default("0.00")
+  withVat      Boolean  @default(false)
+  withPenalties Boolean @default(true)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  drivers      Driver[]
+}
+model Driver {
+  id             Int           @id @default(autoincrement())
+  fullName       String
+  vehicleNumber  String?
+  phone          String?
+  paymentType    String        @default("fixed")
+  paymentValue   String        @default("0.00")
+  withPenalties  Boolean       @default(true)
+  withVat        Boolean       @default(false)
+  driverIdWb     Int?
+  freelancerIdWb Int?
+  status         String        @default("на линии")
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  vehicle        Vehicle?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+model Vehicle {
+  id                 Int      @id @default(autoincrement())
+  licensePlate       String   @unique
+  brand              String   @default("Неизвестно")
+  model              String   @default("Неизвестно")
+  fuelType           String   @default("diesel")
+  tankCapacity       Int      @default(60)
+  year               Int      @default(2020)
+  averageConsumption Float    @default(10)
+  initialMileage     Int      @default(0)
+  status             String   @default("active")
+  driverId           Int?     @unique
+  driver             Driver?  @relation(fields: [driverId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
