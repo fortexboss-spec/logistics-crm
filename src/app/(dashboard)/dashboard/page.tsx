@@ -1,38 +1,54 @@
 ﻿'use client';
 import Header from '@/components/Header';
-import { RefreshCw, TrendingUp, TrendingDown, FileText, AlertTriangle, DollarSign, Package, Plus, UserPlus, Bell } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { RefreshCw, TrendingUp, TrendingDown, FileText, AlertTriangle, DollarSign, Package, UserPlus, Bell } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useState } from 'react';
-const waysheetsData = [{d:'14 фев.',v:200000},{d:'15 фев.',v:650000},{d:'16 фев.',v:500000},{d:'17 фев.',v:550000},{d:'18 фев.',v:480000},{d:'19 фев.',v:600000},{d:'20 фев.',v:650000},{d:'21 фев.',v:550000},{d:'22 фев.',v:700000},{d:'23 фев.',v:600000},{d:'24 фев.',v:650000},{d:'25 фев.',v:500000},{d:'26 фев.',v:200000},{d:'27 фев.',v:100000}];
-const finesData = [{d:'14 фев.',v:60000},{d:'15 фев.',v:75000},{d:'16 фев.',v:70000},{d:'17 фев.',v:80000},{d:'18 фев.',v:65000},{d:'19 фев.',v:85000},{d:'20 фев.',v:75000},{d:'21 фев.',v:90000},{d:'22 фев.',v:85000},{d:'23 фев.',v:92000},{d:'24 фев.',v:88000},{d:'25 фев.',v:80000},{d:'26 фев.',v:90000},{d:'27 фев.',v:15000}];
-const defectsData = [{d:'14 фев.',v:65},{d:'15 фев.',v:15},{d:'16 фев.',v:230},{d:'17 фев.',v:240},{d:'18 фев.',v:220},{d:'19 фев.',v:80},{d:'20 фев.',v:230},{d:'21 фев.',v:250},{d:'22 фев.',v:200},{d:'23 фев.',v:180},{d:'24 фев.',v:130},{d:'25 фев.',v:120},{d:'26 фев.',v:100}];
-const incomeData = [{d:'14 фев.',v:600000},{d:'15 фев.',v:700000},{d:'16 фев.',v:500000},{d:'17 фев.',v:200000},{d:'18 фев.',v:650000},{d:'19 фев.',v:600000},{d:'20 фев.',v:550000},{d:'21 фев.',v:600000},{d:'22 фев.',v:500000},{d:'23 фев.',v:650000},{d:'24 фев.',v:600000},{d:'25 фев.',v:550000},{d:'26 фев.',v:500000},{d:'27 фев.',v:150000}];
-const topProblematic = [{n:'Тимофеичев Иван Александрович',b:43,w:16,p:'268.8%'},{n:'Кравченко Александр Николаевич',b:43,w:20,p:'215%'},{n:'Шемякин Виталий Александрович',b:39,w:13,p:'300%'},{n:'Павлюченков Олег Евгеньевич',b:36,w:19,p:'189.5%'},{n:'Иванов Станислав Александрович',b:35,w:12,p:'291.7%'}];
-const topIncome = [{n:'Олейник Илья Андреевич',w:9,inc:353498,f:14356},{n:'Аланго Дмитрий Евгеньевич',w:8,inc:317993,f:10324},{n:'Крылов Роман Дмитриевич',w:8,inc:311702,f:15416},{n:'Левин Артём Андреевич',w:8,inc:309531,f:20180},{n:'Малышев Данил Владимирович',w:6,inc:246686,f:37008}];
+const wbData = [
+  {d:'18 фев',tasks:484,income:781426,fines:79204,net:702222},
+  {d:'19 фев',tasks:456,income:931178,fines:76600,net:854577},
+  {d:'20 фев',tasks:569,income:833903,fines:111109,net:722793},
+  {d:'21 фев',tasks:667,income:709262,fines:114815,net:594446},
+  {d:'22 фев',tasks:696,income:781871,fines:111331,net:670540},
+  {d:'23 фев',tasks:653,income:819540,fines:119748,net:699791},
+  {d:'24 фев',tasks:598,income:876573,fines:109941,net:766632},
+  {d:'25 фев',tasks:639,income:846577,fines:116703,net:729874},
+  {d:'26 фев',tasks:495,income:707970,fines:86932,net:621037},
+  {d:'27 фев',tasks:701,income:722463,fines:130973,net:591490},
+];
+const totalIncome = wbData.reduce((s,d)=>s+d.income,0);
+const totalFines = wbData.reduce((s,d)=>s+d.fines,0);
+const totalNet = wbData.reduce((s,d)=>s+d.net,0);
+const totalTasks = wbData.reduce((s,d)=>s+d.tasks,0);
 const notifications = [
-  { id:1, text:'Водитель Тимофеичев: 43 брака за неделю', type:'error' },
-  { id:2, text:'Штрафы выросли на 12% за последние 3 дня', type:'warning' },
-  { id:3, text:'5 путевых листов ожидают подтверждения', type:'info' },
+  { id:1, text:'Штрафы 27 фев выросли до 130 973 ₽', type:'error' },
+  { id:2, text:'Баланс WB: 7 434 632 ₽', type:'info' },
+  { id:3, text:'Доступно к выводу: 5 759 141 ₽', type:'info' },
 ];
 const kpiCards = [
-  { title:'Доход за период', value:'7 200 000 ₽', change:'+8.2%', up:true, icon:DollarSign, color:'#22c55e', bg:'rgba(34,197,94,0.1)' },
-  { title:'Путевых листов', value:'142', change:'+12 за неделю', up:true, icon:FileText, color:'#8b5cf6', bg:'rgba(139,92,246,0.1)' },
-  { title:'Сумма штрафов', value:'1 095 000 ₽', change:'+5.1%', up:false, icon:AlertTriangle, color:'#ef4444', bg:'rgba(239,68,68,0.1)' },
-  { title:'Браков', value:'1 730', change:'-3.2%', up:true, icon:Package, color:'#f97316', bg:'rgba(249,115,22,0.1)' },
+  { title:'Начисления за период', value: (totalIncome/1000000).toFixed(2)+' М₽', change:'+реальные данные WB', up:true, icon:DollarSign, color:'#22c55e', bg:'rgba(34,197,94,0.1)' },
+  { title:'Чистый доход', value: (totalNet/1000000).toFixed(2)+' М₽', change:'начисления - штрафы', up:true, icon:FileText, color:'#8b5cf6', bg:'rgba(139,92,246,0.1)' },
+  { title:'Штрафы за период', value: (totalFines/1000).toFixed(0)+' К₽', change:'опоздания, неотметки', up:false, icon:AlertTriangle, color:'#ef4444', bg:'rgba(239,68,68,0.1)' },
+  { title:'Всего заданий', value: totalTasks.toLocaleString(), change:'транспортных заданий', up:true, icon:Package, color:'#f97316', bg:'rgba(249,115,22,0.1)' },
 ];
-const ChartCard = ({title, sub, data, color}: {title:string, sub:string, data:{d:string,v:number}[], color:string}) => (
+const ChartCard = ({title, sub, data, dataKey, color, formatter}: any) => (
   <div style={{border:'1px solid #2d1f3d',borderRadius:'12px',padding:'20px',backgroundColor:'#1e1530',transition:'border-color 0.2s'}}
-    onMouseEnter={(e)=>e.currentTarget.style.borderColor='#4c2d7a'}
-    onMouseLeave={(e)=>e.currentTarget.style.borderColor='#2d1f3d'}>
+    onMouseEnter={(e:any)=>e.currentTarget.style.borderColor='#4c2d7a'}
+    onMouseLeave={(e:any)=>e.currentTarget.style.borderColor='#2d1f3d'}>
     <h3 style={{fontSize:'14px',fontWeight:600,color:'#e7e2f0',marginBottom:'2px'}}>{title}</h3>
     <p style={{fontSize:'12px',color:'#6b5f7a',marginBottom:'16px'}}>{sub}</p>
     <ResponsiveContainer width="100%" height={180}>
-      <LineChart data={data}><CartesianGrid strokeDasharray="3 3" stroke="#2d1f3d"/><XAxis dataKey="d" tick={{fontSize:10,fill:'#6b5f7a'}} /><YAxis tick={{fontSize:10,fill:'#6b5f7a'}} /><Tooltip contentStyle={{backgroundColor:'#1a1125',border:'1px solid #2d1f3d',borderRadius:'8px',color:'#e7e2f0'}} /><Line type="monotone" dataKey="v" stroke={color} strokeWidth={2} dot={{r:3,fill:color}} /></LineChart>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#2d1f3d"/>
+        <XAxis dataKey="d" tick={{fontSize:10,fill:'#6b5f7a'}} />
+        <YAxis tick={{fontSize:10,fill:'#6b5f7a'}} tickFormatter={formatter} />
+        <Tooltip contentStyle={{backgroundColor:'#1a1125',border:'1px solid #2d1f3d',borderRadius:'8px',color:'#e7e2f0'}} formatter={(v:any)=>formatter(v)} />
+        <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={{r:3,fill:color}} />
+      </LineChart>
     </ResponsiveContainer>
   </div>
 );
 export default function DashboardPage() {
-  const [period, setPeriod] = useState('14');
+  const [period, setPeriod] = useState('10');
   const [showNotif, setShowNotif] = useState(false);
   return (
     <div>
@@ -55,21 +71,41 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
-          <button className="btn-outline" style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'13px'}}><RefreshCw size={14} /> Обновить</button>
+          <button style={{display:'flex',alignItems:'center',gap:'6px',padding:'6px 12px',background:'#2d1f3d',border:'1px solid #3b2a52',borderRadius:'8px',color:'#e7e2f0',fontSize:'13px',cursor:'pointer'}}>
+            <RefreshCw size={14} /> Обновить
+          </button>
         </div>
       } />
+      {/* WB Balance Banner */}
+      <div style={{background:'linear-gradient(135deg,#1e1530,#2d1f3d)',border:'1px solid #4c2d7a',borderRadius:'12px',padding:'16px 20px',marginBottom:'20px',display:'flex',gap:'32px',alignItems:'center'}}>
+        <div>
+          <div style={{fontSize:'11px',color:'#6b5f7a',textTransform:'uppercase',letterSpacing:'0.8px',marginBottom:'4px'}}>Баланс WB</div>
+          <div style={{fontSize:'24px',fontWeight:700,color:'#e7e2f0'}}>7 434 632 ₽</div>
+        </div>
+        <div style={{width:'1px',height:'40px',background:'#2d1f3d'}}/>
+        <div>
+          <div style={{fontSize:'11px',color:'#6b5f7a',textTransform:'uppercase',letterSpacing:'0.8px',marginBottom:'4px'}}>Сумма штрафов</div>
+          <div style={{fontSize:'24px',fontWeight:700,color:'#ef4444'}}>-1 081 743 ₽</div>
+        </div>
+        <div style={{width:'1px',height:'40px',background:'#2d1f3d'}}/>
+        <div>
+          <div style={{fontSize:'11px',color:'#6b5f7a',textTransform:'uppercase',letterSpacing:'0.8px',marginBottom:'4px'}}>Доступно к выводу</div>
+          <div style={{fontSize:'24px',fontWeight:700,color:'#22c55e'}}>5 759 141 ₽</div>
+        </div>
+        <div style={{marginLeft:'auto',fontSize:'11px',color:'#6b5f7a'}}>📡 Данные WB · 28.02.2026</div>
+      </div>
       {/* Quick Actions */}
       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px',flexWrap:'wrap'}}>
         <span style={{fontSize:'13px',color:'#6b5f7a',marginRight:'4px'}}>Быстрые действия:</span>
         {[
-          {label:'+ Путевой лист', icon:FileText, color:'#8b5cf6'},
-          {label:'+ Водитель', icon:UserPlus, color:'#22c55e'},
-          {label:'+ Доставка', icon:Package, color:'#3b82f6'},
+          {label:'+ Путевой лист', color:'#8b5cf6'},
+          {label:'+ Водитель', color:'#22c55e'},
+          {label:'+ Доставка', color:'#3b82f6'},
         ].map(a=>(
-          <button key={a.label} style={{display:'flex',alignItems:'center',gap:'6px',padding:'6px 12px',background:'#1e1530',border:'1px solid #2d1f3d',borderRadius:'8px',color:'#e7e2f0',fontSize:'12px',cursor:'pointer',transition:'all 0.15s'}}
-            onMouseEnter={(e)=>{e.currentTarget.style.borderColor=a.color;e.currentTarget.style.color=a.color;}}
-            onMouseLeave={(e)=>{e.currentTarget.style.borderColor='#2d1f3d';e.currentTarget.style.color='#e7e2f0';}}>
-            <a.icon size={13} /> {a.label}
+          <button key={a.label} style={{padding:'6px 12px',background:'#1e1530',border:'1px solid #2d1f3d',borderRadius:'8px',color:'#e7e2f0',fontSize:'12px',cursor:'pointer',transition:'all 0.15s'}}
+            onMouseEnter={(e:any)=>{e.currentTarget.style.borderColor=a.color;e.currentTarget.style.color=a.color;}}
+            onMouseLeave={(e:any)=>{e.currentTarget.style.borderColor='#2d1f3d';e.currentTarget.style.color='#e7e2f0';}}>
+            {a.label}
           </button>
         ))}
       </div>
@@ -77,8 +113,8 @@ export default function DashboardPage() {
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',marginBottom:'24px'}}>
         {kpiCards.map(card=>(
           <div key={card.title} style={{borderRadius:'12px',padding:'16px',background:'#1e1530',border:'1px solid #2d1f3d',transition:'all 0.2s'}}
-            onMouseEnter={(e)=>{e.currentTarget.style.borderColor=card.color;e.currentTarget.style.transform='translateY(-2px)';}}
-            onMouseLeave={(e)=>{e.currentTarget.style.borderColor='#2d1f3d';e.currentTarget.style.transform='translateY(0)';}}>
+            onMouseEnter={(e:any)=>{e.currentTarget.style.borderColor=card.color;e.currentTarget.style.transform='translateY(-2px)';}}
+            onMouseLeave={(e:any)=>{e.currentTarget.style.borderColor='#2d1f3d';e.currentTarget.style.transform='translateY(0)';}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'12px'}}>
               <div style={{fontSize:'12px',color:'#6b5f7a',fontWeight:500}}>{card.title}</div>
               <div style={{width:'32px',height:'32px',borderRadius:'8px',background:card.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -95,9 +131,9 @@ export default function DashboardPage() {
       </div>
       {/* Period Filter */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px'}}>
-        <h2 style={{fontSize:'18px',fontWeight:700,color:'#e7e2f0'}}>Графики</h2>
+        <h2 style={{fontSize:'18px',fontWeight:700,color:'#e7e2f0'}}>Графики <span style={{fontSize:'12px',color:'#6b5f7a',fontWeight:400}}>· реальные данные WB 18-27 фев</span></h2>
         <div style={{display:'flex',gap:'4px',background:'#1e1530',border:'1px solid #2d1f3d',borderRadius:'8px',padding:'3px'}}>
-          {[{label:'7 дней',val:'7'},{label:'14 дней',val:'14'},{label:'Месяц',val:'30'},{label:'Квартал',val:'90'}].map(p=>(
+          {[{label:'7 дней',val:'7'},{label:'10 дней',val:'10'},{label:'Месяц',val:'30'}].map(p=>(
             <button key={p.val} onClick={()=>setPeriod(p.val)}
               style={{padding:'5px 12px',borderRadius:'6px',border:'none',fontSize:'12px',cursor:'pointer',fontWeight: period===p.val?600:400,
                 background: period===p.val?'#3b1f5e':'transparent',
@@ -108,62 +144,45 @@ export default function DashboardPage() {
         </div>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',marginBottom:'24px'}}>
-        <ChartCard title="Сумма путевых листов" sub="Общая стоимость закрытых путевых за период" data={waysheetsData} color="#8b5cf6" />
-        <ChartCard title="Штрафы" sub="Сумма штрафов по путевым листам за период" data={finesData} color="#ef4444" />
-        <ChartCard title="Браки" sub="Количество браков по дням за период" data={defectsData} color="#f97316" />
-        <ChartCard title="Доходы (путевые - штрафы)" sub="Чистый доход по дням за период" data={incomeData} color="#22c55e" />
+        <ChartCard title="Начисления по дням" sub="Транспортные задания WB (с НДС)" data={wbData} dataKey="income" color="#8b5cf6" formatter={(v:number)=>v>=1000?(v/1000).toFixed(0)+'К':v} />
+        <ChartCard title="Штрафы по дням" sub="Опоздания, неотметки на точках маршрута" data={wbData} dataKey="fines" color="#ef4444" formatter={(v:number)=>v>=1000?(v/1000).toFixed(0)+'К':v} />
+        <ChartCard title="Чистый доход по дням" sub="Начисления минус штрафы" data={wbData} dataKey="net" color="#22c55e" formatter={(v:number)=>v>=1000?(v/1000).toFixed(0)+'К':v} />
+        <ChartCard title="Количество заданий" sub="Транспортных заданий в день" data={wbData} dataKey="tasks" color="#f97316" formatter={(v:number)=>v+' шт'} />
       </div>
-      <h2 style={{fontSize:'18px',fontWeight:700,color:'#e7e2f0',marginBottom:'12px'}}>Топ водителей</h2>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
-        <div style={{border:'1px solid #2d1f3d',borderRadius:'12px',padding:'20px',backgroundColor:'#1e1530'}}>
-          <h3 style={{fontSize:'14px',fontWeight:600,color:'#e7e2f0',marginBottom:'2px'}}>Топ-10 проблемных водителей</h3>
-          <p style={{fontSize:'12px',color:'#6b5f7a',marginBottom:'16px'}}>Водители с наибольшим количеством браков за неделю</p>
-          <table style={{width:'100%',fontSize:'13px'}}>
-            <thead><tr style={{borderBottom:'1px solid #2d1f3d'}}>
-              <th style={{padding:'8px',textAlign:'left',color:'#6b5f7a',fontWeight:500}}>№</th>
-              <th style={{padding:'8px',textAlign:'left',color:'#6b5f7a',fontWeight:500}}>Водитель</th>
-              <th style={{padding:'8px',textAlign:'center',color:'#6b5f7a',fontWeight:500}}>Браков</th>
-              <th style={{padding:'8px',textAlign:'center',color:'#6b5f7a',fontWeight:500}}>Путевых</th>
-              <th style={{padding:'8px',textAlign:'center',color:'#6b5f7a',fontWeight:500}}>% браков</th>
-            </tr></thead>
-            <tbody>{topProblematic.map((d,i) => (
+      {/* Daily Table */}
+      <h2 style={{fontSize:'18px',fontWeight:700,color:'#e7e2f0',marginBottom:'12px'}}>Детализация по дням</h2>
+      <div style={{border:'1px solid #2d1f3d',borderRadius:'12px',overflow:'hidden',backgroundColor:'#1e1530'}}>
+        <table style={{width:'100%',fontSize:'13px',borderCollapse:'collapse'}}>
+          <thead>
+            <tr style={{borderBottom:'1px solid #2d1f3d',background:'#1a1125'}}>
+              <th style={{padding:'12px 16px',textAlign:'left',color:'#6b5f7a',fontWeight:500}}>Дата</th>
+              <th style={{padding:'12px 16px',textAlign:'center',color:'#6b5f7a',fontWeight:500}}>Заданий</th>
+              <th style={{padding:'12px 16px',textAlign:'right',color:'#6b5f7a',fontWeight:500}}>Начисления</th>
+              <th style={{padding:'12px 16px',textAlign:'right',color:'#6b5f7a',fontWeight:500}}>Штрафы</th>
+              <th style={{padding:'12px 16px',textAlign:'right',color:'#6b5f7a',fontWeight:500}}>Итог</th>
+            </tr>
+          </thead>
+          <tbody>
+            {wbData.map((d,i)=>(
               <tr key={i} style={{borderBottom:'1px solid #1a1125',transition:'background 0.15s'}}
-                onMouseEnter={(e)=>e.currentTarget.style.background='rgba(139,92,246,0.05)'}
-                onMouseLeave={(e)=>e.currentTarget.style.background='transparent'}>
-                <td style={{padding:'10px 8px',color:'#6b5f7a',fontWeight:600}}>{i+1}</td>
-                <td style={{padding:'10px 8px',color:'#e7e2f0'}}>{d.n}</td>
-                <td style={{padding:'10px 8px',textAlign:'center'}}><span className="badge-red">{d.b}</span></td>
-                <td style={{padding:'10px 8px',textAlign:'center',color:'#e7e2f0'}}>{d.w}</td>
-                <td style={{padding:'10px 8px',textAlign:'center'}}><span className="badge-yellow">{d.p}</span></td>
+                onMouseEnter={(e:any)=>e.currentTarget.style.background='rgba(139,92,246,0.05)'}
+                onMouseLeave={(e:any)=>e.currentTarget.style.background='transparent'}>
+                <td style={{padding:'12px 16px',color:'#e7e2f0',fontWeight:500}}>{d.d}</td>
+                <td style={{padding:'12px 16px',textAlign:'center'}}><span style={{background:'rgba(249,115,22,0.15)',color:'#f97316',padding:'2px 8px',borderRadius:'12px',fontSize:'12px',fontWeight:600}}>{d.tasks} шт</span></td>
+                <td style={{padding:'12px 16px',textAlign:'right',color:'#8b5cf6',fontWeight:500}}>{d.income.toLocaleString()} ₽</td>
+                <td style={{padding:'12px 16px',textAlign:'right',color:'#ef4444',fontWeight:500}}>-{d.fines.toLocaleString()} ₽</td>
+                <td style={{padding:'12px 16px',textAlign:'right',color:'#22c55e',fontWeight:700}}>{d.net.toLocaleString()} ₽</td>
               </tr>
-            ))}</tbody>
-          </table>
-        </div>
-        <div style={{border:'1px solid #2d1f3d',borderRadius:'12px',padding:'20px',backgroundColor:'#1e1530'}}>
-          <h3 style={{fontSize:'14px',fontWeight:600,color:'#e7e2f0',marginBottom:'2px'}}>Топ-10 водителей по доходу</h3>
-          <p style={{fontSize:'12px',color:'#6b5f7a',marginBottom:'16px'}}>Водители с наибольшим чистым доходом за неделю</p>
-          <table style={{width:'100%',fontSize:'13px'}}>
-            <thead><tr style={{borderBottom:'1px solid #2d1f3d'}}>
-              <th style={{padding:'8px',textAlign:'left',color:'#6b5f7a',fontWeight:500}}>№</th>
-              <th style={{padding:'8px',textAlign:'left',color:'#6b5f7a',fontWeight:500}}>Водитель</th>
-              <th style={{padding:'8px',textAlign:'center',color:'#6b5f7a',fontWeight:500}}>Путевых</th>
-              <th style={{padding:'8px',textAlign:'right',color:'#6b5f7a',fontWeight:500}}>Доход</th>
-            </tr></thead>
-            <tbody>{topIncome.map((d,i) => (
-              <tr key={i} style={{borderBottom:'1px solid #1a1125',transition:'background 0.15s'}}
-                onMouseEnter={(e)=>e.currentTarget.style.background='rgba(34,197,94,0.05)'}
-                onMouseLeave={(e)=>e.currentTarget.style.background='transparent'}>
-                <td style={{padding:'10px 8px',color:'#6b5f7a',fontWeight:600}}>{i+1}</td>
-                <td style={{padding:'10px 8px',color:'#e7e2f0'}}>{d.n}</td>
-                <td style={{padding:'10px 8px',textAlign:'center',color:'#e7e2f0'}}>{d.w}</td>
-                <td style={{padding:'10px 8px',textAlign:'right'}}>
-                  <span style={{color:'#22c55e',fontWeight:700}}>{d.inc.toLocaleString()} ₽</span><br/>
-                  <span style={{fontSize:'11px',color:'#6b5f7a'}}>штрафы: {d.f.toLocaleString()} ₽</span>
-                </td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
+            ))}
+            <tr style={{background:'#1a1125',borderTop:'2px solid #2d1f3d'}}>
+              <td style={{padding:'12px 16px',color:'#e7e2f0',fontWeight:700}}>ИТОГО</td>
+              <td style={{padding:'12px 16px',textAlign:'center',color:'#f97316',fontWeight:700}}>{totalTasks} шт</td>
+              <td style={{padding:'12px 16px',textAlign:'right',color:'#8b5cf6',fontWeight:700}}>{totalIncome.toLocaleString()} ₽</td>
+              <td style={{padding:'12px 16px',textAlign:'right',color:'#ef4444',fontWeight:700}}>-{totalFines.toLocaleString()} ₽</td>
+              <td style={{padding:'12px 16px',textAlign:'right',color:'#22c55e',fontWeight:700}}>{totalNet.toLocaleString()} ₽</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
