@@ -1,4 +1,5 @@
-'use client';
+﻿const fs = require('fs');
+const code = `'use client';
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { RefreshCw, AlertTriangle, TrendingDown } from 'lucide-react';
@@ -96,4 +97,6 @@ export default function WBMonitoringPage() {
       )}
     </div>
   );
-}
+}`;
+fs.writeFileSync('src/app/(dashboard)/wb-monitoring/page.tsx', code, 'utf8');
+console.log('done');
