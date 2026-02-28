@@ -24,6 +24,7 @@ const menuGroups = [
     label: 'Wildberries',
     items: [
       { name: 'WB Мониторинг', href: '/wb-monitoring', icon: Activity },
+      { name: 'Остатки ПМ', href: '/wb-monitoring/last-mile', icon: BarChart3 },
       { name: 'WB Аккаунты', href: '/wb-accounts', icon: Key },
     ]
   },
@@ -85,3 +86,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+
