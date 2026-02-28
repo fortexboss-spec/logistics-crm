@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿const fs = require('fs');
+const code = `import { NextRequest, NextResponse } from 'next/server';
 const WB_TOKEN = process.env.WB_TOKEN || '';
 const SUPPLIER_ID = '344813';
 async function fetchDay(date: string) {
@@ -27,4 +28,6 @@ export async function GET(req: NextRequest) {
   } catch(e) {
     return NextResponse.json({error:String(e)},{status:500});
   }
-}
+}`;
+fs.writeFileSync('src/app/api/wb-finance/route.ts', code, 'utf8');
+console.log('done');
